@@ -1,0 +1,11 @@
+{
+  "name": "fix-gh-watchlist",
+  "version": "1.0.0",
+  "description": "cli to unsubscribe (ignore) github repos",
+  "main": "lib/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ivan Pazhytnykh <ivan.pazhitnykh@gmail.com> (https://github.com/Drapegnik)",
+  "license": "MIT"
+}
