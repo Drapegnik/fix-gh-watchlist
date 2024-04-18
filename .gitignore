@@ -1,0 +1,4 @@
+node_modules
+dist
+whitelist.txt
+.env
