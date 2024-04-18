@@ -12,14 +12,14 @@ cli to unsubscribe (ignore) github repos from https://github.com/watching
 ```bash
 npm i
 npm run watch
-npm start
+npm start -- --org=github -w whitelist.txt
 ```
 
 ## build
 
 ```bash
 npm run build
-npm install -g .
+cd dist && npm install -g .
 
 # test
 fix-gh-watchlist --help

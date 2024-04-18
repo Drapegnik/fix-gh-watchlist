@@ -1,3 +1,5 @@
+#!/usr/bin/env ts-node
+
 import 'dotenv/config';
 import * as fs from 'fs';
 import {Octokit} from '@octokit/core';
@@ -51,7 +53,7 @@ async function readWhitelistFromFile(filePath?: string): Promise<string[]> {
       .map((line) => line.trim())
       .filter(Boolean);
 
-    console.log(`\tRead ${repos.length} whitelisted repos`);
+    console.log(`\tRead ${repos.length} whitelisted repos...`);
 
     return repos;
   } catch (error) {
@@ -81,7 +83,7 @@ async function fetchAllOrgWatchedRepos(octokit: Octokit, orgName: string) {
 
     const orgRepos = repos.filter((r) => r.startsWith(`${orgName}/`));
     console.log(
-      `\tFound ${orgRepos.length} subscriptions to @${orgName} repos`
+      `\tFound ${orgRepos.length} subscriptions to @${orgName} repos...`
     );
 
     return orgRepos;
