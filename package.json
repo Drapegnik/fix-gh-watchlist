@@ -2,13 +2,20 @@
   "name": "fix-gh-watchlist",
   "version": "0.1.0",
   "description": "cli to unsubscribe (ignore) github repos",
+  "keywords": [
+    "github",
+    "cli",
+    "watchlist",
+    "unsubscribe",
+    "notifications"
+  ],
   "main": "lib/index.ts",
   "bin": {
     "fix-gh-watchlist": "./index.js"
   },
   "type": "module",
   "scripts": {
-    "build": "rm -rf dist && tsc && cp package.json dist",
+    "build": "rm -rf dist && tsc && cp README.md package.json dist",
     "postbuild": "perl -i -pe 's,#!/usr/bin/env ts-node,#!/usr/bin/env node,g' dist/index.js",
     "watch": "tsc -w",
     "start": "node ./dist/index.js"
