@@ -1,6 +1,6 @@
 {
   "name": "fix-gh-watchlist",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "cli to unsubscribe (ignore) github repos",
   "main": "lib/index.ts",
   "bin": {
