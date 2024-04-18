@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "cli to unsubscribe (ignore) github repos",
   "main": "lib/index.ts",
+  "bin": {
+    "fix-gh-watchlist": "dist/index.js"
+  },
   "type": "module",
   "scripts": {
     "build": "tsc",
@@ -13,10 +16,12 @@
   "license": "MIT",
   "dependencies": {
     "@octokit/core": "^6.1.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
+    "@types/yargs": "^17.0.32",
     "typescript": "^5.4.5"
   }
 }

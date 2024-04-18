@@ -2,22 +2,48 @@ import 'dotenv/config';
 import * as fs from 'fs';
 import {Octokit} from '@octokit/core';
 
+import yargs from 'yargs/yargs';
+import {hideBin} from 'yargs/helpers';
+
+const helpText =
+  '\nPAT_TOKEN=<token> fix-gh-watchlist --org=github -w <whitelist file path>';
+
+const argv = yargs(hideBin(process.argv))
+  .option('w', {
+    alias: 'whitelist',
+    describe: 'Whitelist file path',
+    type: 'string',
+    demandOption: false,
+  })
+  .option('org', {
+    describe: 'GitHub organization name',
+    type: 'string',
+    demandOption: true,
+  })
+  .option('f', {
+    alias: 'force',
+    describe: 'To execute unsubscribe action',
+    type: 'boolean',
+    demandOption: false,
+  })
+  .example('', helpText)
+  .parseSync();
+
 const token = process.env.PAT_TOKEN;
-const orgName = process.env.ORG;
-// Update with your whitelist file path
-const whitelistFilePath = 'whitelist.txt';
+const orgName = argv.org;
+const whitelistFilePath = argv.w;
+const dryRun = !argv.f;
+
 const GH_API_VERSION = '2022-11-28';
 const headers = {
   'X-GitHub-Api-Version': GH_API_VERSION,
 };
 
-if (!token || !orgName) {
-  throw new Error('Please provide PAT_TOKEN & ORG env vars');
-}
-
-const octokit = new Octokit({auth: token});
-
-async function readWhitelistFromFile(filePath: string): Promise<string[]> {
+async function readWhitelistFromFile(filePath?: string): Promise<string[]> {
+  if (!filePath) {
+    console.log('\tNo whitelist file provided!');
+    return [];
+  }
   try {
     const data = fs.readFileSync(filePath, 'utf-8');
     const repos = data
@@ -34,7 +60,7 @@ async function readWhitelistFromFile(filePath: string): Promise<string[]> {
   }
 }
 
-async function fetchAllOrgWatchedRepos(orgName: string) {
+async function fetchAllOrgWatchedRepos(octokit: Octokit, orgName: string) {
   try {
     const repos: string[] = [];
     let page = 1;
@@ -65,7 +91,7 @@ async function fetchAllOrgWatchedRepos(orgName: string) {
   }
 }
 
-async function ignoreRepo(repoName: string) {
+async function ignoreRepo(octokit: Octokit, repoName: string) {
   console.log(`\t\tUnsubscribing from ${repoName} (Ignoring)`);
   const [owner, repo] = repoName.split('/');
   return octokit.request('PUT /repos/{owner}/{repo}/subscription', {
@@ -77,19 +103,41 @@ async function ignoreRepo(repoName: string) {
   });
 }
 
-async function ignoreOrgWatchedRepos(orgName: string) {
+async function run() {
   try {
-    const repos = await fetchAllOrgWatchedRepos(orgName);
+    if (!token) {
+      console.log('Please provide PAT_TOKEN env var');
+      return;
+    }
+
+    const octokit = new Octokit({auth: token});
+
+    if (dryRun) {
+      console.log('\tExecuting in dry-run mode.');
+    }
+    const repos = await fetchAllOrgWatchedRepos(octokit, orgName);
     const whitelist = await readWhitelistFromFile(whitelistFilePath);
     const reposToIgnore = repos.filter((r) => !whitelist.includes(r));
 
-    console.log(`\tIgnoring ${reposToIgnore.length} repos:`);
-    await Promise.all(reposToIgnore.map(ignoreRepo));
+    if (!reposToIgnore.length) {
+      console.log('\tNo repos to ignore.');
+      return;
+    }
 
-    console.log('\tIgnore process completed.');
+    if (dryRun) {
+      console.log(`\tPrepared ${reposToIgnore.length} repos to ignore:`);
+      console.log(JSON.stringify(reposToIgnore, null, 2));
+      console.log(
+        '\tRun with -f (--force) flag to execute unsubscribe action.'
+      );
+    } else {
+      console.log(`\tIgnoring ${reposToIgnore.length} repos:`);
+      await Promise.all(reposToIgnore.map((r) => ignoreRepo(octokit, r)));
+      console.log('\tIgnore process completed.');
+    }
   } catch (error) {
     console.error('Error occurred:', error);
   }
 }
 
-ignoreOrgWatchedRepos(orgName);
+run();
